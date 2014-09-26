@@ -3,13 +3,14 @@ package br.com.caelum.financas.dao;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import br.com.caelum.financas.exception.ValorInvalidoException;
 import br.com.caelum.financas.modelo.Conta;
@@ -115,5 +116,32 @@ public class MovimentacaoDao {
 	
 	public int quantidadeDeMovimentacoesPorConta(Conta conta) {
 		return listaTodasMovimentacoes(conta).size();
+	}
+	
+	public List<Movimentacao> listaTodasComCriteria() {
+		CriteriaBuilder builder = this.manager.getCriteriaBuilder();
+		CriteriaQuery<Movimentacao> criteria = builder.createQuery(Movimentacao.class);
+		criteria.from(Movimentacao.class);
+		
+		return this.manager.createQuery(criteria).getResultList();
+	}
+	
+	public BigDecimal somaMovimentacoesDoTitular(String titular) {
+		CriteriaBuilder builder = this.manager.getCriteriaBuilder();
+		CriteriaQuery<BigDecimal> criteria = builder.createQuery(BigDecimal.class);
+		Root<Movimentacao> root = criteria.from(Movimentacao.class);
+		criteria.select(
+				builder.sum(
+						root.<BigDecimal> get("valor")
+				)
+		);
+		
+		criteria.where(
+				builder.like(
+						root.<Conta>get("conta").<String>get("titular"), 
+						"%" + titular + "%")
+		);
+
+		return this.manager.createQuery(criteria).getSingleResult();
 	}
 }
