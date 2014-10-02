@@ -1,10 +1,11 @@
 package br.com.caelum.financas.mb;
 
-import br.com.caelum.financas.dao.MovimentacaoDao;
-import br.com.caelum.financas.modelo.Conta;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import br.com.caelum.financas.dao.ContaDao;
+import br.com.caelum.financas.modelo.Conta;
 
 @Named
 @RequestScoped
@@ -14,11 +15,13 @@ public class QtdeMovimentacoesDaContaBean {
 	private int quantidade;
 	
 	@Inject
-	private MovimentacaoDao dao;
+	private ContaDao contaDao;
 	
 	public void lista() {
 		System.out.println("Exibindo as quantidades de movimentacoes da conta");
-		quantidade = dao.quantidadeDeMovimentacoesPorConta(conta);
+		
+		conta = contaDao.busca(conta.getId());
+		quantidade = conta.getMovimentacoes().size();
 	}
 
 	public Conta getConta() {

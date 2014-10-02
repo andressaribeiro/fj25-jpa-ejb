@@ -4,6 +4,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 /**
  * 
  * @author Andressa Albuquerque
@@ -12,6 +15,7 @@ import javax.persistence.Id;
 @SuppressWarnings("deprecation")
 // isso indica para o hibernate das update na tabelas apenas os campos que realmente mudaram ao inves de todos os campos
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
+//@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 @Entity
 public class Conta {
 

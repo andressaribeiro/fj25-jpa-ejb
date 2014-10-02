@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.transaction.UserTransaction;
 
 import br.com.caelum.financas.modelo.Conta;
@@ -62,6 +63,17 @@ public class ContaDao {
 	public void remove(Conta conta) {
 		Conta contaParaRemover = this.manager.find(Conta.class, conta.getId());
 		this.manager.remove(contaParaRemover);
+	}
+	
+	public int trocaNomeDoBancoEmLote(String antigoNomeBanco, String novoNomeBanco) {
+		String jpql = "UPDATE Conta c SET c.banco = :novoNome " +
+				"WHERE c.banco = :antigoNome";
+		
+		Query query = manager.createQuery(jpql);
+		query.setParameter("antigoNome", antigoNomeBanco);
+		query.setParameter("novoNome", novoNomeBanco);
+		
+		return query.executeUpdate();
 	}
 
 }

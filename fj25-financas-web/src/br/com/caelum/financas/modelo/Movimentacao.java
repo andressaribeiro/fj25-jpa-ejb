@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -16,9 +17,10 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 
-@NamedQuery(name="Movimentacao.buscaTodasMovimentacoesDaConta",
-			query="select m from Movimentacao m where m.conta.titular like :titular")
 @Entity
+@Cacheable
+@NamedQuery(name="Movimentacao.buscaTodasMovimentacoesDaConta",
+query="select m from Movimentacao m where m.conta.titular like :titular")
 public class Movimentacao implements Serializable {
  
 	private static final long serialVersionUID = 1L;

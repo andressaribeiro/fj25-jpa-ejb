@@ -1,6 +1,7 @@
 package br.com.caelum.financas.dao;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -10,6 +11,9 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import br.com.caelum.financas.exception.ValorInvalidoException;
@@ -29,7 +33,7 @@ public class MovimentacaoDao {
 		this.manager.persist(movimentacao);
 		
 		if(movimentacao.getValor().compareTo(BigDecimal.ZERO) < 0) {
-			throw new ValorInvalidoException("Movimentac20/09/2014ao negativa");
+			throw new ValorInvalidoException("Movimentacao negativa");
 		}
 	}
 
@@ -63,6 +67,7 @@ public class MovimentacaoDao {
 		query.setParameter("valor", valor);
 		query.setParameter("tipoMovimentacao", tipoMovimentacao);
 		
+		query.setHint("org.hibernate.cacheable", true);
 		
 		return query.getResultList();
 	}
@@ -114,10 +119,6 @@ public class MovimentacaoDao {
 		return this.manager.createQuery("select distinct m from Movimentacao m left join fetch m.categorias", Movimentacao.class).getResultList();
 	}
 	
-	public int quantidadeDeMovimentacoesPorConta(Conta conta) {
-		return listaTodasMovimentacoes(conta).size();
-	}
-	
 	public List<Movimentacao> listaTodasComCriteria() {
 		CriteriaBuilder builder = this.manager.getCriteriaBuilder();
 		CriteriaQuery<Movimentacao> criteria = builder.createQuery(Movimentacao.class);
@@ -144,4 +145,31 @@ public class MovimentacaoDao {
 
 		return this.manager.createQuery(criteria).getSingleResult();
 	}
+	
+	public List<Movimentacao> pesquisa(Conta conta, TipoMovimentacao tipoMovimentacao, Integer mes) {
+		CriteriaBuilder builder = this.manager.getCriteriaBuilder();
+		CriteriaQuery<Movimentacao> criteria = builder.createQuery(Movimentacao.class);		
+		Root<Movimentacao> root = criteria.from(Movimentacao.class);
+		Predicate conjunction = builder.conjunction();
+		if (conta.getId() != null) {
+			// Desafio 14.9 - mas não faz sentido pois mapeamentos @ManyToOne são EAGER
+			root.<Movimentacao, Conta>fetch("conta", JoinType.LEFT);
+			conjunction = builder.and(conjunction, builder.equal(root.<Conta>get("conta"), conta));
+		}
+		
+		if (mes != null) {
+			Expression<Integer> expression = builder.function("month", Integer.class, root.<Calendar>get("data"));
+			conjunction =  builder.and(conjunction, builder.equal(expression, mes));
+		}
+
+		if (tipoMovimentacao != null) {
+			conjunction =  builder.and(conjunction, builder.equal(root.<TipoMovimentacao>get("tipoMovimentacao"), tipoMovimentacao));
+		}
+		
+		criteria.where(conjunction);
+		
+		return this.manager.createQuery(criteria).getResultList();
+	}
+	
+	
 }

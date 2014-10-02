@@ -3,32 +3,31 @@ package br.com.caelum.financas.mb;
 import java.math.BigDecimal;
 import java.util.List;
 
+import br.com.caelum.financas.dao.MovimentacaoDao;
+import br.com.caelum.financas.modelo.Movimentacao;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import br.com.caelum.financas.dao.MovimentacaoDao;
-import br.com.caelum.financas.modelo.Movimentacao;
-
 @Named
 @RequestScoped
 public class CriteriaBean {
-	
-	@Inject
-	private MovimentacaoDao dao;
 	
 	private List<Movimentacao> movimentacoes;
 	private BigDecimal soma;
 	
 	private String titular;
 	
+	@Inject
+	private MovimentacaoDao dao;
+	
 
 	public void listarTodasAsMovimentacoes() {
-		this.movimentacoes = dao.listaTodasComCriteria();
+		movimentacoes = dao.listaTodasComCriteria();
 	}
 
 	public void somaMovimentacoesDoTitular() {
-		this.soma = dao.somaMovimentacoesDoTitular(titular);
+		soma = dao.somaMovimentacoesDoTitular(titular);
 	}
 	
 	public List<Movimentacao> getMovimentacoes() {
