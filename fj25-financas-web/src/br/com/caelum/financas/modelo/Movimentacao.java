@@ -17,7 +17,10 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 
+import org.hibernate.envers.Audited;
+
 @Entity
+@Audited
 @Cacheable
 @NamedQuery(name="Movimentacao.buscaTodasMovimentacoesDaConta",
 query="select m from Movimentacao m where m.conta.titular like :titular")
